@@ -1,12 +1,5 @@
 node_modules
-
-# Output
-.output
-.vercel
-.netlify
-.wrangler
-/.svelte-kit
-/build
+dist
 
 # OS
 .DS_Store
@@ -24,10 +17,19 @@ vite.config.ts.timestamp-*
 
 # SQLite
 *.db
-/data/*.db
+/data/
+/backend/data/
+
+# Python
+__pycache__
+.venv
+*.pyc
 
 # Playwright
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Coverage
+/coverage/
