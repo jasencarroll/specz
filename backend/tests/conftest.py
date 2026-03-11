@@ -1,20 +1,17 @@
+import os
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from app.database import get_db
 from app.main import app
 from app.models import Base, MagicLink, Session, Spec, User  # noqa: F401
 
-SQLALCHEMY_TEST_URL = "sqlite://"
+SQLALCHEMY_TEST_URL = os.environ.get("TEST_DATABASE_URL", "postgresql://localhost/specz_test")
 
-engine = create_engine(
-    SQLALCHEMY_TEST_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+engine = create_engine(SQLALCHEMY_TEST_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

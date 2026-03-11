@@ -49,7 +49,7 @@ Specz is a conversational AI tool that conducts product intake interviews and ge
 ### Tech Stack
 
 - **Frontend**: React 19, React Router v7, Tailwind CSS v4, shadcn/ui, Biome
-- **Backend**: FastAPI, SQLAlchemy, SQLite, Ruff
+- **Backend**: FastAPI, SQLAlchemy, PostgreSQL, Ruff
 - **AI**: Mistral API (devstral-small-latest) for chat streaming and spec generation
 - **Auth**: Custom magic link implementation via Resend
 - **Package managers**: uv (backend), bun (frontend)

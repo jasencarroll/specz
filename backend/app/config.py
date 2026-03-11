@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
-    database_url: str = "sqlite:///./data/specz.db"
+    database_url: str = "postgresql://localhost/specz"
     mistral_api_key: str = ""
     resend_api_key: str = ""
     cors_origins: list[str] = ["http://localhost:5173"]
