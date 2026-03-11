@@ -9,7 +9,9 @@ from app.database import get_db
 from app.main import app
 from app.models import Base, MagicLink, Session, Spec, User  # noqa: F401
 
-SQLALCHEMY_TEST_URL = os.environ.get("TEST_DATABASE_URL", "postgresql://localhost/specz_test")
+SQLALCHEMY_TEST_URL = os.environ.get(
+    "TEST_DATABASE_URL", "postgresql://localhost/specz_test"
+)
 
 engine = create_engine(SQLALCHEMY_TEST_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
