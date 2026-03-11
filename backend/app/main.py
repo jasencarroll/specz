@@ -1,8 +1,9 @@
-import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from .config import settings
@@ -38,7 +39,14 @@ app.include_router(chat_router)
 app.include_router(generate_router)
 app.include_router(specs_router)
 
-# In production, serve the built React app
-frontend_dist = os.path.join(os.path.dirname(__file__), "../../frontend/dist")
-if os.path.isdir(frontend_dist):
-    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
+# In production, serve the built React app with SPA catch-all
+frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
+if frontend_dir.exists():
+    app.mount("/assets", StaticFiles(directory=frontend_dir / "assets"), name="static")
+
+    @app.get("/{path:path}")
+    async def serve_spa(path: str) -> FileResponse:
+        file = frontend_dir / path
+        if file.exists() and file.is_file():
+            return FileResponse(file)
+        return FileResponse(frontend_dir / "index.html")
