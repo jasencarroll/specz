@@ -18,5 +18,4 @@ COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
 RUN mkdir -p /app/backend/data
 
-EXPOSE 8000
-CMD ["uv", "run", "--directory", "backend", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD sh -c "uv run --directory backend uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
