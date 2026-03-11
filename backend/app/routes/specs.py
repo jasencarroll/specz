@@ -40,7 +40,7 @@ def spec_to_response(spec: Spec) -> SpecResponse:
     )
 
 
-@router.get("/")
+@router.get("")
 def list_specs(
     db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ) -> list[SpecResponse]:
@@ -53,7 +53,7 @@ def list_specs(
     return [spec_to_response(s) for s in specs]
 
 
-@router.post("/")
+@router.post("")
 def create_spec(
     body: SpecCreateRequest,
     db: Session = Depends(get_db),

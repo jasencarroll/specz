@@ -36,7 +36,7 @@ Vite proxies `/api/*` and `/auth/verify` to the FastAPI server.
 
 ### Database
 
-SQLite database at `backend/data/specz.db`. Tables are auto-created on server startup via SQLAlchemy `create_all`.
+PostgreSQL database `specz`. Tables are auto-created on server startup via SQLAlchemy `create_all`.
 
 ## Architecture
 
@@ -110,7 +110,7 @@ Chat endpoint (`POST /api/chat`) uses Mistral streaming with SSE format via `Str
 ### Environment
 
 Backend `.env` requires:
-- `DATABASE_URL` - SQLite URL (e.g., `sqlite:///./data/specz.db`)
+- `DATABASE_URL` - PostgreSQL URL (e.g., `postgresql://localhost/specz`)
 - `MISTRAL_API_KEY` - Mistral API key
 - `RESEND_API_KEY` - Resend API key for magic link emails
 
