@@ -37,6 +37,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost/specz_test
+      DATABASE_URL: postgresql://postgres:postgres@localhost/specz_test
     defaults:
       run:
         working-directory: backend
@@ -46,8 +49,6 @@ jobs:
       - run: uv sync
       - name: Run tests
         run: uv run pytest -v
-        env:
-          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost/specz_test
 
   frontend-lint:
     name: Frontend Lint
