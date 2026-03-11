@@ -50,7 +50,7 @@ export function Chat({
 		if (messagesRef.current) {
 			messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
 		}
-	}, []);
+	}, [messages]);
 
 	const send = async () => {
 		if (!input.trim() || isLoading) return;
