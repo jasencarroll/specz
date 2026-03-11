@@ -16,4 +16,4 @@ RUN cd backend && uv sync --no-dev
 COPY backend/ ./backend/
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
-CMD sh -c "uv run --directory backend uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+CMD sh -c "cd backend && .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
