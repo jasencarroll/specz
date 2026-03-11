@@ -2,7 +2,7 @@
 
 A conversational AI tool that conducts structured product interviews and generates software specifications.
 
-**Live Demo:** [specz-production.up.railway.app](https://specz-production.up.railway.app)
+**Live Demo:** [specz.jasencarroll.com](https://specz.jasencarroll.com)
 
 ## Tech Stack
 
