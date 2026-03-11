@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     session_cookie_name: str = "auth-session"
     magic_link_expiry_minutes: int = 15
     session_expiry_days: int = 30
+    from_email: str = "Specz <noreply@jasencarroll.com>"
 
 
 settings = Settings()

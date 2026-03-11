@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { apiGet } from '@/lib/api';
 
 interface Spec {
 	id: string;
@@ -29,8 +30,7 @@ export function SpecList() {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		fetch('/api/specs')
-			.then((r) => r.json())
+		apiGet('/api/specs')
 			.then(setSpecs)
 			.finally(() => setLoading(false));
 	}, []);

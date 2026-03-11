@@ -8,7 +8,7 @@ resend.api_key = settings.resend_api_key
 def send_magic_link_email(to: str, url: str) -> None:
     resend.Emails.send(
         {
-            "from": "Specz <noreply@jasencarroll.com>",
+            "from": settings.from_email,
             "to": to,
             "subject": "Sign in to Specz",
             "html": f"""

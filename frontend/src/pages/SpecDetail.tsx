@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { apiDelete, apiPatch } from '@/lib/api';
+import { apiDelete, apiGet, apiPatch } from '@/lib/api';
 
 interface Spec {
 	id: string;
@@ -26,12 +26,11 @@ export function SpecDetail() {
 	const [renameValue, setRenameValue] = useState('');
 
 	const fetchSpec = useCallback(async () => {
-		const res = await fetch(`/api/specs/${id}`);
-		if (!res.ok) {
+		try {
+			setSpec(await apiGet(`/api/specs/${id}`));
+		} catch {
 			navigate('/specs');
-			return;
 		}
-		setSpec(await res.json());
 	}, [id, navigate]);
 
 	useEffect(() => {
