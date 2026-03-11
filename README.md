@@ -1,206 +1,173 @@
 # Specz
 
-A conversational AI tool for generating software specifications through guided interviews.
+A conversational AI tool that conducts structured product interviews and generates software specifications.
 
-**Live Demo:** [specz.jasenc.dev](https://specz.jasenc.dev)
-
-![Specz Screenshot](src/lib/assets/screenshot.png)
-
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment Setup](#environment-setup)
-- [Development](#development)
-- [Testing](#testing)
-  - [Unit Tests](#unit-tests)
-  - [Integration Tests](#integration-tests)
-  - [End-to-End Tests](#end-to-end-tests)
-  - [Coverage](#coverage)
-- [Database](#database)
-- [Deployment](#deployment)
-- [Project Structure](#project-structure)
-
-## Features
-
-- **Specz Mode**: Interactive interview to gather requirements and generate comprehensive software specifications
-- **SpeczCheck Mode**: Upload existing specs for AI-powered review and feedback
-- **User Authentication**: Secure login/registration with Argon2 password hashing
-- **Session Management**: Persistent sessions with secure cookie handling
-- **Markdown Output**: Generated specs in clean, exportable Markdown format
+**Live Demo:** [specz-production.up.railway.app](https://specz-production.up.railway.app)
 
 ## Tech Stack
 
-- **Framework**: [SvelteKit](https://kit.svelte.dev/) with Svelte 5
-- **Database**: SQLite with [Drizzle ORM](https://orm.drizzle.team/)
-- **AI**: [Mistral AI](https://mistral.ai/) for conversational interviews and spec generation
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Authentication**: Custom implementation with [Argon2](https://github.com/nicolo-ribaudo/node-rs-argon2) and [Oslo](https://oslo.js.org/)
-- **Testing**: [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/)
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React 19, React Router v7, Tailwind CSS v4, shadcn/ui |
+| **Backend** | FastAPI, SQLAlchemy, PostgreSQL |
+| **AI** | Mistral API (devstral-small-latest), SSE streaming |
+| **Auth** | Custom magic link implementation via Resend |
+| **Tooling** | uv, Ruff, Bun, Biome |
+| **CI/CD** | GitHub Actions (lint, test, build), Railway (Dockerfile) |
+
+## Features
+
+- **Specz Mode** -- AI-driven interview that asks targeted questions about your project, then generates a structured software specification from the conversation
+- **SpeczCheck Mode** -- Paste an existing spec and receive AI-powered analysis with actionable feedback
+- **Magic Link Auth** -- Passwordless authentication via email; tokens are SHA-256 hashed with 15-minute expiry
+- **Streaming Chat** -- Real-time SSE streaming from Mistral AI with incremental UI rendering
+- **Spec Management** -- List, view, copy, and download generated specifications as Markdown
+
+## Architecture
+
+### Interview and Generation Flow
+
+```
+User starts a new spec
+       |
+       v
+  Select mode: specz or speczcheck
+       |
+       +--> specz: AI conducts a product interview
+       |         |
+       |         v
+       |    AI signals READY_TO_GENERATE
+       |         |
+       |         v
+       |    POST /api/generate --> structured spec
+       |
+       +--> speczcheck: User pastes existing spec
+                 |
+                 v
+            AI analyzes and returns feedback
+```
+
+### Backend
+
+FastAPI serves both the REST API and the built React frontend in production. Key routes:
+
+- `POST /api/auth/send-magic-link` -- send login email via Resend
+- `GET /api/auth/verify` -- validate token, create session, set cookie
+- `POST /api/chat` -- SSE streaming chat with Mistral AI
+- `POST /api/generate` -- generate a complete spec from conversation history
+- `GET /api/specs` -- list and retrieve saved specifications
+- `GET /api/health` -- health check for Railway
+
+### Frontend
+
+Single-page React app with client-side routing. The chat component reads SSE streams and renders Markdown incrementally. Protected routes require an active session.
+
+### Database Schema
+
+Four tables: `user`, `session`, `magic_link`, and `spec`. Sessions have 30-day expiry with automatic renewal. Specs store the full conversation as JSON alongside the generated output.
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) (recommended) or Node.js 18+
-- Mistral AI API key
+- [Python 3.13+](https://www.python.org/) with [uv](https://docs.astral.sh/uv/)
+- [Bun](https://bun.sh/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Mistral API key](https://console.mistral.ai/)
+- [Resend API key](https://resend.com/) (for magic link emails)
 
-### Installation
+### Setup
 
 ```sh
-# Clone the repository
-git clone <repository-url>
+# Clone
+git clone https://github.com/jasencarroll/specz.git
 cd specz
 
-# Install dependencies
+# Backend
+cd backend
+uv sync
+cp .env.example .env   # then fill in your keys
+
+# Frontend
+cd ../frontend
 bun install
-
-# Install Playwright browsers (for e2e tests)
-bunx playwright install chromium
 ```
 
-### Environment Setup
+### Environment Variables
 
-Create a `.env` file in the project root:
+Create `backend/.env`:
 
-```env
-MISTRAL_API_KEY=your_mistral_api_key_here
-DATABASE_URL=./data/specz.db
+```
+DATABASE_URL=postgresql://localhost/specz
+MISTRAL_API_KEY=your_mistral_key
+RESEND_API_KEY=your_resend_key
 ```
 
-## Development
+### Development
+
+Run both servers in separate terminals:
 
 ```sh
-# Start development server
+# Terminal 1 -- Backend (port 8000)
+cd backend
+uv run uvicorn app.main:app --reload --port 8000
+
+# Terminal 2 -- Frontend (port 5173, proxies /api to backend)
+cd frontend
 bun run dev
-
-# Type checking
-bun run check
-
-# Linting and formatting
-bun run lint
-bun run format
 ```
 
-## Testing
-
-### Unit Tests
-
-Tests for pure functions, utilities, and prompts:
+### Testing
 
 ```sh
-bun run test:unit
-```
+# Backend
+cd backend
+uv run ruff check .       # lint
+uv run ruff format .      # format
+uv run pytest             # tests (requires PostgreSQL)
 
-### Integration Tests
-
-Tests database operations with an in-memory SQLite database:
-
-```sh
-bun run test:integration
-```
-
-### End-to-End Tests
-
-Full browser tests with Playwright:
-
-```sh
-# Run e2e tests
-bun run test:e2e
-
-# Run with Playwright UI
-bun run test:e2e:ui
-```
-
-### Coverage
-
-```sh
-bun run test -- --coverage
-```
-
-### Run All Tests
-
-```sh
-bun run test
-```
-
-## Database
-
-The project uses SQLite with Drizzle ORM.
-
-```sh
-# Push schema changes to database
-bun run db:push
-
-# Generate migrations
-bun run db:generate
-
-# Run migrations
-bun run db:migrate
-
-# Open Drizzle Studio
-bun run db:studio
+# Frontend
+cd frontend
+bun run lint              # Biome lint
+bun run build             # type-check + build
 ```
 
 ## Deployment
 
-### Railway
+The app deploys to Railway using a multi-stage Dockerfile:
 
-1. Install the Railway CLI and login:
+1. **Stage 1** -- `oven/bun` image builds the React frontend
+2. **Stage 2** -- `ghcr.io/astral-sh/uv` image installs backend dependencies and serves both the API and static frontend
 
-```sh
-brew install railway
-railway login
-```
-
-2. Initialize and deploy:
-
-```sh
-railway init
-railway up
-```
-
-3. Set environment variables in Railway dashboard:
-
-```
-MISTRAL_API_KEY=your_key_here
-DATABASE_URL=/data/specz.db
-```
-
-4. Add a volume for SQLite persistence:
-   - Go to your service → Settings → Volumes
-   - Add volume with mount path: `/data`
-
-The `railway.json` config handles the build and start commands automatically.
+Railway configuration is defined in `railway.json` with a health check at `/api/health`.
 
 ## Project Structure
 
 ```
 specz/
-├── e2e/                    # Playwright e2e tests
-│   ├── auth.test.ts
-│   └── specs.test.ts
-├── src/
-│   ├── lib/
-│   │   ├── components/     # Svelte components
-│   │   ├── prompts/        # AI prompt templates
-│   │   ├── server/         # Server-side code
-│   │   │   ├── db/         # Database schema and connection
-│   │   │   └── auth.ts     # Authentication logic
-│   │   └── utils/          # Utility functions
-│   ├── routes/             # SvelteKit routes
-│   │   ├── api/            # API endpoints
-│   │   ├── login/
-│   │   ├── register/
-│   │   ├── logout/
-│   │   └── specs/          # Specs pages
-│   └── tests/              # Integration tests
-│       ├── helpers.ts
-│       └── integration/
-├── playwright.config.ts
-├── vitest.config.ts
-└── drizzle.config.ts
+├── backend/
+│   └── app/
+│       ├── main.py            # FastAPI app, CORS, static file serving
+│       ├── config.py          # Pydantic Settings
+│       ├── database.py        # SQLAlchemy engine + session
+│       ├── models.py          # ORM models
+│       ├── schemas.py         # Request/response schemas
+│       ├── dependencies.py    # Auth dependencies
+│       ├── routes/            # auth, chat, generate, specs, health
+│       ├── lib/               # auth, magic_link, email utilities
+│       └── prompts/           # Mistral system prompts (specz, generate, check)
+├── frontend/
+│   └── src/
+│       ├── App.tsx            # Route definitions
+│       ├── components/        # Chat, Header, SpecView, ProtectedRoute, ui/
+│       ├── pages/             # Home, Auth, SpecList, SpecDetail, SpeczCheck
+│       ├── hooks/             # useAuth context
+│       └── lib/               # API helpers, cn() utility
+├── Dockerfile                 # Multi-stage production build
+├── railway.json               # Railway deployment config
+└── .github/workflows/ci.yml   # CI pipeline
 ```
+
+## License
+
+See [LICENSE.txt](LICENSE.txt).
